@@ -1,12 +1,13 @@
 server:
-  port: 8005
+  port: 8002
   servlet:
-    context-path: /consumer
+    context-path: /producer
 
 spring:
   application:
-    name: hanyi-consumer
+    name: hanyi-producer
   cloud:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+

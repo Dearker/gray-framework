@@ -2,8 +2,7 @@ package com.hanyi.consumer.configuration;
 
 import com.hanyi.consumer.feign.lb.api.HashLoadbalancerRule;
 import com.hanyi.consumer.feign.lb.api.LoadbalancerRule;
-import com.hanyi.consumer.feign.service.DemoFeign;
-import org.springframework.context.annotation.Bean;
+import com.hanyi.consumer.feign.service.PersonFeign;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -17,14 +16,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CustomizeBeanConfiguration {
 
-    @Bean
-    public LoadbalancerRule<DemoFeign> getLBRule(){
-        return new HashLoadbalancerRule<>(DemoFeign.class,"key");
+    //@Bean
+    public LoadbalancerRule<PersonFeign> getLBRule(){
+        return new HashLoadbalancerRule<>(PersonFeign.class,"key");
     }
 
-    @Bean
-    public LoadbalancerRule<DemoFeign> getLBRule2(){
-        return new HashLoadbalancerRule<>(DemoFeign.class,"key");
+    //@Bean
+    public LoadbalancerRule<PersonFeign> getLBRule2(){
+        return new HashLoadbalancerRule<>(PersonFeign.class,"key");
     }
 
 }

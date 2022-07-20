@@ -1,3 +1,38 @@
 server:
   port: 8001
 
+spring:
+  application:
+    name: gray-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    #通用网关配置
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
+        # 路由(集合)
+      routes:
+        # id唯一标识
+        - id: privoder-route-gray
+          # 动态路由
+          uri: grayLb://hanyi-producer
+          #uri: lb://hanyi-producer
+          # 断言，路由拦截规则
+          predicates:
+            - Path=/producer/**
+            #- HeaderUsername=Jack
+          #filters:
+          #  - AddRequestHeader=version,gray
+        - id: privoder-route
+          # 动态路由
+          uri: grayLb://hanyi-producer
+          #uri: lb://hanyi-producer
+          # 断言，路由拦截规则
+          predicates:
+            - Path=/producer/**
+          filters:
+            - AddRequestHeader=version,v1

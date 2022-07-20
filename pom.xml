@@ -12,7 +12,7 @@
     <modules>
         <module>gray-gateway</module>
         <module>hanyi-util</module>
-        <module>hanyi-privoder</module>
+        <module>hanyi-producer</module>
         <module>hanyi-consumer</module>
     </modules>
 
