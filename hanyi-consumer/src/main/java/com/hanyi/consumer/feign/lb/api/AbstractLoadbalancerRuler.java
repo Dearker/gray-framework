@@ -1,6 +1,6 @@
 package com.hanyi.consumer.feign.lb.api;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.hanyi.consumer.exception.BizException;
 import org.springframework.cloud.openfeign.FeignClient;
 
@@ -20,21 +20,18 @@ public abstract class AbstractLoadbalancerRuler<T> implements LoadbalancerRule<T
 
     private final String path;
 
-    public AbstractLoadbalancerRuler(Class<T> type) {
+    protected AbstractLoadbalancerRuler(Class<T> type) {
         this.type = type;
         FeignClient annotation = type.getAnnotation(FeignClient.class);
         if (annotation == null) {
             throw new BizException(1001, "can not find FeignClient annotation");
         }
-        if (StrUtil.isBlank(annotation.value()) && StrUtil.isBlank(annotation.name())) {
+        if (CharSequenceUtil.isBlank(annotation.value()) && CharSequenceUtil.isBlank(annotation.name())) {
             throw new BizException(1002, "value/name in FeignClient annotation can not be empty");
         }
-        if (StrUtil.isBlank(annotation.value())) {
-            applicationName = annotation.name();
-        } else {
-            applicationName = annotation.value();
-        }
-        if (StrUtil.isBlank(annotation.url())) {
+        String value = annotation.value();
+        applicationName = CharSequenceUtil.isBlank(value) ? annotation.name() : value;
+        if (CharSequenceUtil.isBlank(annotation.url())) {
             throw new BizException(1003, "url in FeignClient annotation can not be empty");
         }
         path = annotation.path();

@@ -1,5 +1,6 @@
 package com.hanyi.consumer.feign.service;
 
+import com.hanyi.consumer.feign.lb.api.HashLoadbalancerRule;
 import com.hanyi.consumer.feign.pojo.Person;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author wcwei@iflytek.com
  * @since 2022-07-20 18:28
  */
-@FeignClient(name= "hanyi-producer", path = "/producer/person"/*, url = HashLoadbalancerRule.NAME*/)
+@FeignClient(name= "hanyi-producer", path = "/producer/person", url = HashLoadbalancerRule.NAME)
 public interface PersonFeign {
 
     @GetMapping("/byId")

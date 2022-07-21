@@ -1,9 +1,6 @@
 package com.hanyi.consumer.feign.lb.api;
 
 import feign.RequestTemplate;
-import org.springframework.cloud.client.ServiceInstance;
-
-import java.util.List;
 
 /**
  * <p>
@@ -31,11 +28,10 @@ public interface LoadbalancerRule<T> {
 
     /**
      *
-     * @param instances 当前注册中心中的实例
      * @param template 当此请求template，可以获取到请求参数
      * @return 返回负载均衡算法的请求url
      */
-    String rule(List<ServiceInstance> instances, RequestTemplate template);
+    String rule(RequestTemplate template);
 
     /**
      * 获取类型

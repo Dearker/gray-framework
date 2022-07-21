@@ -1,16 +1,19 @@
 package com.hanyi.consumer.feign.lb.api;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import feign.Request;
 import feign.RequestTemplate;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.util.CollectionUtils;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 
+import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -24,16 +27,14 @@ public class HashLoadbalancerRule<T> extends AbstractLoadbalancerRuler<T> {
 
     public static final String NAME = "hash";
 
-    private final String key;
+    @Resource
+    private DiscoveryClient discoveryClient;
 
     /**
-     *
      * @param type feignclient 的类
-     * @param key 需要用来hash的key，会自动从解析get请求和json类型的post请求，其他类型略..
      */
-    public HashLoadbalancerRule(Class<T> type, String key) {
+    public HashLoadbalancerRule(Class<T> type) {
         super(type);
-        this.key = key;
     }
 
     @Override
@@ -42,15 +43,17 @@ public class HashLoadbalancerRule<T> extends AbstractLoadbalancerRuler<T> {
     }
 
     @Override
-    public String rule(List<ServiceInstance> instances, RequestTemplate template) {
+    public String rule(RequestTemplate template) {
+        List<ServiceInstance> instances = discoveryClient.getInstances(super.getApplicationName());
+
         instances.sort(Comparator.comparing(ServiceInstance::getHost));
-        String value = this.getValue(template, key);
+        String value = this.getValue(template);
         int i = Math.abs(value.hashCode() % instances.size());
         ServiceInstance serviceInstance = instances.get(i);
         String host = serviceInstance.getHost();
         int port = serviceInstance.getPort();
-        String path = getPath();
-        if (StrUtil.isBlank(path)) {
+        String path = super.getPath();
+        if (CharSequenceUtil.isBlank(path)) {
             return String.format("http://%s:%s", host, port);
         }
         if (path.startsWith("/")) {
@@ -63,16 +66,18 @@ public class HashLoadbalancerRule<T> extends AbstractLoadbalancerRuler<T> {
         return requestTemplate.method().equalsIgnoreCase(Request.HttpMethod.GET.name());
     }
 
-    public String getValue(RequestTemplate requestTemplate, String key) {
-        if (isGetRequestTemplate(requestTemplate)) {
-            Collection<String> strings = requestTemplate.queries().get(key);
-            if (!CollectionUtils.isEmpty(strings)) {
-                return strings.iterator().next();
+    public String getValue(RequestTemplate requestTemplate) {
+        if (this.isGetRequestTemplate(requestTemplate)) {
+            //获取所有参数集合
+            Map<String, Collection<String>> queriesMap = requestTemplate.queries();
+            if (CollUtil.isNotEmpty(queriesMap)) {
+                return queriesMap.values().stream().flatMap(Collection::stream).sorted()
+                        .findFirst().orElse(CharSequenceUtil.EMPTY);
             }
         } else {
             byte[] body = requestTemplate.body();
             JSONObject jsonObject = JSON.parseObject(new String(body));
-            return jsonObject.getString(key);
+            return jsonObject.toJSONString();
         }
         return null;
     }

@@ -27,12 +27,3 @@ spring:
             #- HeaderUsername=Jack
           #filters:
           #  - AddRequestHeader=version,gray
-        - id: privoder-route
-          # 动态路由
-          uri: grayLb://hanyi-producer
-          #uri: lb://hanyi-producer
-          # 断言，路由拦截规则
-          predicates:
-            - Path=/producer/**
-          filters:
-            - AddRequestHeader=version,v1
