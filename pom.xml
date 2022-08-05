@@ -14,6 +14,7 @@
         <module>hanyi-util</module>
         <module>hanyi-producer</module>
         <module>hanyi-consumer</module>
+        <module>Rocket-framework</module>
     </modules>
 
     <properties>
