@@ -1,4 +1,11 @@
 server:
   port: 8006
 
-
+rocketmq:
+  #rocketMQ服务的地址
+  name-server: 192.168.243.128:9876
+  producer:
+    # 生产者组
+    group: shop-order
+    #消息发送超时时长
+    send-message-timeout: 3000

@@ -6,6 +6,7 @@ import com.hanyi.rocket.factory.RocketClientFactoryBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.*;
 import org.springframework.context.EnvironmentAware;
@@ -20,12 +21,10 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>
@@ -110,15 +109,16 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
                                      Map<String, Object> attributes) {
         String className = annotationMetadata.getClassName();
         Class clazz = ClassUtils.resolveClassName(className, null);
+        RocketClientFactoryBean factoryBean = new RocketClientFactoryBean();
         ConfigurableBeanFactory beanFactory = registry instanceof ConfigurableBeanFactory
                 ? (ConfigurableBeanFactory) registry : null;
-        RocketClientFactoryBean factoryBean = new RocketClientFactoryBean();
         factoryBean.setBeanFactory(beanFactory);
-        factoryBean.setName(getName(attributes));
+
+        factoryBean.setTopic(this.getTopic(attributes));
         factoryBean.setType(clazz);
         BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(clazz, factoryBean::getObject);
         definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-        //definition.setLazyInit(true);
+        definition.setLazyInit(true);
 
         AbstractBeanDefinition beanDefinition = definition.getBeanDefinition();
         beanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, className);
@@ -129,15 +129,30 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
 
         beanDefinition.setPrimary(primary);
 
-        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);
+        String[] qualifiers = getQualifiers(attributes);
+        if (ObjectUtils.isEmpty(qualifiers)) {
+            qualifiers = new String[] {"FeignClient" };
+        }
+
+        BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, qualifiers);
+        BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
     }
 
-    private String getName(Map<String, Object> attributes) {
-        String name = (String) attributes.get("name");
+    private String getTopic(Map<String, Object> attributes) {
+        String name = (String) attributes.get("topic");
         if (!StringUtils.hasText(name)) {
             name = (String) attributes.get("value");
         }
         return name;
+    }
+
+    private String[] getQualifiers(Map<String, Object> client) {
+        if (client == null) {
+            return null;
+        }
+        List<String> qualifierList = new ArrayList<>(Arrays.asList((String[]) client.get("qualifiers")));
+        qualifierList.removeIf(qualifier -> !StringUtils.hasText(qualifier));
+        return !qualifierList.isEmpty() ? qualifierList.toArray(new String[0]) : null;
     }
 
     protected Set<String> getBasePackages(AnnotationMetadata importingClassMetadata) {

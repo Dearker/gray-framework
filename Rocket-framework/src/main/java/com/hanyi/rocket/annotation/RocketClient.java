@@ -21,17 +21,25 @@ public @interface RocketClient {
     /**
      * @return topic name
      */
-    @AliasFor("name")
+    @AliasFor("topic")
     String value() default "";
 
     /**
      * @return topic name
      */
     @AliasFor("value")
-    String name() default "";
+    String topic() default "";
 
     /**
      * @return whether to mark the rocket proxy as a primary bean. Defaults to true.
      */
     boolean primary() default true;
+
+    /**
+     * 别名集合
+     *
+     * @return 返回别名集合
+     */
+    String[] qualifiers() default {};
+
 }

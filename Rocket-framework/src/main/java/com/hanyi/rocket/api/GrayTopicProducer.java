@@ -10,9 +10,8 @@ import com.hanyi.rocket.annotation.RocketClient;
  * @author wcwei@iflytek.com
  * @since 2022-08-05 10:23
  */
-@RocketClient("test-topic")
-public interface GrayTopicProducer extends RocketBaseProducer{
-
+@RocketClient(topic = "test-topic-1")
+public interface GrayTopicProducer extends RocketBaseProducer {
 
 
 }

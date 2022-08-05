@@ -1,10 +1,7 @@
 package com.hanyi.rocket.api;
 
-import org.apache.rocketmq.client.exception.MQBrokerException;
-import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
-import org.apache.rocketmq.remoting.exception.RemotingException;
 
 /**
  * <p>
@@ -16,9 +13,8 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
  */
 public interface RocketBaseProducer {
 
-    SendResult send(final Message msg) throws MQClientException, RemotingException, MQBrokerException, InterruptedException;
+    SendResult send(Object message);
 
-    void sendOneway(final Message msg) throws MQClientException, RemotingException,
-            InterruptedException;
+    void sendOneway(final Message msg);
 
 }
