@@ -56,17 +56,15 @@ public class RocketClientFactoryBean implements FactoryBean<Object>, Application
         Map<Method, RocketMethodHandler> methodHandlerMap = new HashMap<>(methods.length);
 
         //获取mq的配置属性
-        /*RocketMQProperties rocketMqProperties = Binder.get(this.getApplicationContext().getEnvironment())
-                .bind("rocketmq", RocketMQProperties.class).orElse(null);*/
-        DefaultMQProducer defaultMQProducer = this.getBeanFactory().getBean(DefaultMQProducer.class);
+        DefaultMQProducer defaultMqProducer = this.getBeanFactory().getBean(DefaultMQProducer.class);
 
         for (Method method : methods) {
-            SynchronousRocketMethodHandler handler = new SynchronousRocketMethodHandler(this.getTopic(),defaultMQProducer);
+            SynchronousRocketMethodHandler handler = new SynchronousRocketMethodHandler(this.getTopic(), defaultMqProducer);
             methodHandlerMap.put(method, handler);
         }
 
         RocketInvocationHandler rocketInvocationHandler = new RocketInvocationHandler(methodHandlerMap);
-        return Proxy.newProxyInstance(this.getType().getClassLoader(), this.getType().getInterfaces(), rocketInvocationHandler);
+        return Proxy.newProxyInstance(this.getType().getClassLoader(),new Class[] {this.getType()}, rocketInvocationHandler);
     }
 
     @Override

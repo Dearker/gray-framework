@@ -1,5 +1,6 @@
 package com.hanyi.rocket.registrar;
 
+import cn.hutool.core.util.StrUtil;
 import com.hanyi.rocket.annotation.EnableRocketClients;
 import com.hanyi.rocket.annotation.RocketClient;
 import com.hanyi.rocket.factory.RocketClientFactoryBean;
@@ -100,13 +101,14 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
                 Map<String, Object> attributes = annotationMetadata
                         .getAnnotationAttributes(RocketClient.class.getCanonicalName());
 
-                registerFeignClient(registry, annotationMetadata, attributes);
+                registerRocketClient(registry, annotationMetadata, attributes);
+                //register(registry, annotationMetadata);
             }
         }
     }
 
-    private void registerFeignClient(BeanDefinitionRegistry registry, AnnotationMetadata annotationMetadata,
-                                     Map<String, Object> attributes) {
+    private void registerRocketClient(BeanDefinitionRegistry registry, AnnotationMetadata annotationMetadata,
+                                      Map<String, Object> attributes) {
         String className = annotationMetadata.getClassName();
         Class clazz = ClassUtils.resolveClassName(className, null);
         RocketClientFactoryBean factoryBean = new RocketClientFactoryBean();
@@ -129,9 +131,10 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
 
         beanDefinition.setPrimary(primary);
 
+        //别名
         String[] qualifiers = getQualifiers(attributes);
         if (ObjectUtils.isEmpty(qualifiers)) {
-            qualifiers = new String[] {"FeignClient" };
+            qualifiers = new String[]{StrUtil.lowerFirst(clazz.getSimpleName())};
         }
 
         BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, qualifiers);
@@ -170,7 +173,7 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
                 basePackages.add(pkg);
             }
         }
-        for (Class<?> clazz : (Class[]) attributes.get("basePackageClasses")) {
+        for (Class<?> clazz : (Class<?>[]) attributes.get("basePackageClasses")) {
             basePackages.add(ClassUtils.getPackageName(clazz));
         }
 
