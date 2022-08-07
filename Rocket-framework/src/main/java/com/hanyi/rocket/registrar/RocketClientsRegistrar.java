@@ -1,6 +1,6 @@
 package com.hanyi.rocket.registrar;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.hanyi.rocket.annotation.EnableRocketClients;
 import com.hanyi.rocket.annotation.RocketClient;
 import com.hanyi.rocket.factory.RocketClientFactoryBean;
@@ -44,7 +44,7 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
     /**
      * Set the {@code Environment} that this component runs in.
      *
-     * @param environment
+     * @param environment 返回环境对象
      */
     @Override
     public void setEnvironment(Environment environment) {
@@ -83,10 +83,10 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
     @Override
     public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
         LinkedHashSet<BeanDefinition> candidateComponents = new LinkedHashSet<>();
-        ClassPathScanningCandidateComponentProvider scanner = getScanner();
+        ClassPathScanningCandidateComponentProvider scanner = this.getScanner();
         scanner.setResourceLoader(this.resourceLoader);
         scanner.addIncludeFilter(new AnnotationTypeFilter(RocketClient.class));
-        Set<String> basePackages = getBasePackages(metadata);
+        Set<String> basePackages = this.getBasePackages(metadata);
         for (String basePackage : basePackages) {
             candidateComponents.addAll(scanner.findCandidateComponents(basePackage));
         }
@@ -101,8 +101,7 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
                 Map<String, Object> attributes = annotationMetadata
                         .getAnnotationAttributes(RocketClient.class.getCanonicalName());
 
-                registerRocketClient(registry, annotationMetadata, attributes);
-                //register(registry, annotationMetadata);
+                this.registerRocketClient(registry, annotationMetadata, attributes);
             }
         }
     }
@@ -112,9 +111,7 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
         String className = annotationMetadata.getClassName();
         Class clazz = ClassUtils.resolveClassName(className, null);
         RocketClientFactoryBean factoryBean = new RocketClientFactoryBean();
-        ConfigurableBeanFactory beanFactory = registry instanceof ConfigurableBeanFactory
-                ? (ConfigurableBeanFactory) registry : null;
-        factoryBean.setBeanFactory(beanFactory);
+        factoryBean.setBeanFactory((ConfigurableBeanFactory) registry);
 
         factoryBean.setTopic(this.getTopic(attributes));
         factoryBean.setType(clazz);
@@ -134,7 +131,7 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
         //别名
         String[] qualifiers = getQualifiers(attributes);
         if (ObjectUtils.isEmpty(qualifiers)) {
-            qualifiers = new String[]{StrUtil.lowerFirst(clazz.getSimpleName())};
+            qualifiers = new String[]{CharSequenceUtil.lowerFirst(clazz.getSimpleName())};
         }
 
         BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, qualifiers);
@@ -142,11 +139,8 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
     }
 
     private String getTopic(Map<String, Object> attributes) {
-        String name = (String) attributes.get("topic");
-        if (!StringUtils.hasText(name)) {
-            name = (String) attributes.get("value");
-        }
-        return name;
+        String topic = (String) attributes.get("topic");
+        return CharSequenceUtil.isBlank(topic) ? (String) attributes.get("value") : topic;
     }
 
     private String[] getQualifiers(Map<String, Object> client) {
@@ -187,13 +181,7 @@ public class RocketClientsRegistrar implements ImportBeanDefinitionRegistrar, Re
         return new ClassPathScanningCandidateComponentProvider(false, this.environment) {
             @Override
             protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-                boolean isCandidate = false;
-                if (beanDefinition.getMetadata().isIndependent()) {
-                    if (!beanDefinition.getMetadata().isAnnotation()) {
-                        isCandidate = true;
-                    }
-                }
-                return isCandidate;
+                return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
             }
         };
     }

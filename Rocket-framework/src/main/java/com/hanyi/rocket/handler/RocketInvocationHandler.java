@@ -15,12 +15,7 @@ import java.util.Map;
  */
 public class RocketInvocationHandler implements InvocationHandler {
 
-    private Map<Method, RocketMethodHandler> dispatch;
-
-
-    public RocketInvocationHandler(){
-
-    }
+    private final Map<Method, RocketMethodHandler> dispatch;
 
     public RocketInvocationHandler(Map<Method, RocketMethodHandler> dispatch) {
         this.dispatch = dispatch;

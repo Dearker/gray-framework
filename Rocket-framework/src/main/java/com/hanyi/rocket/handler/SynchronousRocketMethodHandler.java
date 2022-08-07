@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.common.message.Message;
 
+import java.lang.reflect.Method;
+
 /**
  * <p>
  *
@@ -15,6 +17,7 @@ import org.apache.rocketmq.common.message.Message;
 @RequiredArgsConstructor
 public class SynchronousRocketMethodHandler implements RocketMethodHandler {
 
+    private final Method method;
 
     private final String topic;
 

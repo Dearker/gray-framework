@@ -8,8 +8,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -24,13 +22,11 @@ import java.util.Map;
  * @author wcwei@iflytek.com
  * @since 2022-08-05 10:56
  */
-public class RocketClientFactoryBean implements FactoryBean<Object>, ApplicationContextAware, BeanFactoryAware {
+public class RocketClientFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
 
     private Class<?> type;
 
     private String topic;
-
-    private ApplicationContext applicationContext;
 
     private BeanFactory beanFactory;
 
@@ -59,12 +55,12 @@ public class RocketClientFactoryBean implements FactoryBean<Object>, Application
         DefaultMQProducer defaultMqProducer = this.getBeanFactory().getBean(DefaultMQProducer.class);
 
         for (Method method : methods) {
-            SynchronousRocketMethodHandler handler = new SynchronousRocketMethodHandler(this.getTopic(), defaultMqProducer);
+            SynchronousRocketMethodHandler handler = new SynchronousRocketMethodHandler(method, this.getTopic(), defaultMqProducer);
             methodHandlerMap.put(method, handler);
         }
 
         RocketInvocationHandler rocketInvocationHandler = new RocketInvocationHandler(methodHandlerMap);
-        return Proxy.newProxyInstance(this.getType().getClassLoader(),new Class[] {this.getType()}, rocketInvocationHandler);
+        return Proxy.newProxyInstance(this.getType().getClassLoader(), new Class[]{this.getType()}, rocketInvocationHandler);
     }
 
     @Override
@@ -72,16 +68,7 @@ public class RocketClientFactoryBean implements FactoryBean<Object>, Application
         return type;
     }
 
-    public ApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
-
-    public BeanFactory getBeanFactory(){
+    public BeanFactory getBeanFactory() {
         return this.beanFactory;
     }
 
