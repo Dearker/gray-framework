@@ -1,0 +1,32 @@
+server:
+  port: 8007
+
+spring:
+  application:
+    name: dubbo-producer
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 10.4.149.63:8848
+  main:
+    allow-circular-references: true
+
+# Dubbo
+dubbo:
+  # 服务名
+  application:
+    name: dubbo-provider
+  # 扫描包
+  scan:
+    base-packages: com.hanyi.dubbo.api
+  # 注册中心地址
+  registry:
+    address: nacos://10.4.149.63:8848
+    #parameters[namespace]: 22d4d895-eb9c-44c7-8c56-f33c08e2808a
+  # 协议
+  protocol:
+    name: dubbo
+    port: -1
+  cloud:
+    subscribed-services: "dubbo-consumer"
+
