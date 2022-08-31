@@ -56,9 +56,7 @@ public class MnsComponent {
      * 发送普通消息
      */
     public void sendMessage() {
-        try {
-            QueueSession session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-
+        try (QueueSession session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE)) {
             Queue queue = session.createQueue(queueName);
             MessageProducer producer = session.createProducer(queue);
 
@@ -76,9 +74,7 @@ public class MnsComponent {
      * 发送延迟消息
      */
     public void sendDelayMessage() {
-        try {
-            QueueSession session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-
+        try (QueueSession session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE)) {
             Queue queue = session.createQueue(queueName);
             MessageProducer producer = session.createProducer(queue);
 
@@ -98,9 +94,7 @@ public class MnsComponent {
      * 自动消费，AUTO_ACKNOWLEDGE模式消费
      */
     public void autoConsumer() {
-        try {
-            QueueSession session = connection.createQueueSession(false, MNSQueueSession.AUTO_ACKNOWLEDGE);
-
+        try (QueueSession session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE)) {
             Queue queue = session.createQueue(queueName);
             MessageConsumer consumer = session.createConsumer(queue);
             MessageListener listener = message -> {
@@ -119,9 +113,7 @@ public class MnsComponent {
     }
 
     public void manualConsumer() {
-        try {
-            QueueSession session = connection.createQueueSession(false, MNSQueueSession.MANUAL_ACKNOWLEDGE);
-
+        try (QueueSession session = connection.createQueueSession(false, MNSQueueSession.MANUAL_ACKNOWLEDGE)) {
             Queue queue = session.createQueue(queueName);
             MessageConsumer consumer = session.createConsumer(queue);
             MessageListener listener = message -> {
